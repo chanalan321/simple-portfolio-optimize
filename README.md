@@ -8,7 +8,7 @@ In this project aim to develop a website that allows users to create his/her own
 ## Stock data enter
 All stock data was saved in "/data" file. User can enter stock data by using the data in the "data" file.
 
-# Host web server on local host
+## Host web server on local host
 The packaged webserver was provided to visitor. The vistoer can host the web server on local host by using "/exe/webserver.exe"
 
 # Result
