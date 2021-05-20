@@ -1,0 +1,214 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Student Information Collection</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+</head>
+   <body>
+   <script type="text/javascript">
+         function pickedStockPortfolio(myRadio) {
+            document.getElementById("pickedStock1").value = myRadio.value;
+            document.getElementById("pickedStock2").value = myRadio.value;
+         }
+   </script>
+      <div class="container">
+         <div class="row">
+           <div class="col-8 offset-2">
+            <div class="container">
+               <form action = "{{ url_for('uploadFile') }}" method = "POST" enctype="multipart/form-data">   
+                  <div class="row">
+                  <div class="col-9">
+                     <input type="file" id="myFile" accept=".txt" name="myFile">
+                  </div>
+                  <div class="col-2 ">
+                     <input type="submit" value="Browse">
+                  </div>
+                  </div>
+               </form>
+               <div class="row">
+                  <div class="col-12">
+                  <form action = "{{ url_for('pickStock') }}" method = "POST">       
+                     <h5>Stock pool:</h5>      
+                     {% for result in newestTicker %}
+                     <div class="form-check form-check-inline">
+                        <input type="checkbox" name="Ticker" class="form-check-input" id={{result}} value={{result}}>
+                        <label class="form-check-label" for={{result}}>{{result}}</label>
+                     </div>
+                     {% endfor %}  
+                     <p/>
+                     <div class="form-group"> 
+                        <input type="submit" value="Pick Stock">
+                     </div> 
+                     <h5>Portfolio pool:</h5>         
+                     <div class="col-12">
+                        <table class="table">
+                           <thead>
+                           <tr>
+                              <th></th>
+                              <th>Id</th>
+                              <th>Weights</th>
+                              <th>Name</th>
+                              <th>Start Date</th>
+                              <th>End Date</th>
+                              <th>Return</th>
+                              <th>Risk</th>
+                           </tr>
+                           </thead>
+
+                           <tbody>
+                           {% for f in range(newestPick|length)  %}
+                           <tr>
+                              
+                           {% for i in range(newestPick[f][1]|length) %}
+                           <td>
+                              <input type="radio" name="pickedStockGroup" class="form-check-input" id={{f}} value={{f}} onclick="pickedStockPortfolio(this);" >
+                           </td>
+                           <td>
+                              {{f}}
+                           </td>
+                           {% for d in range(newestPick[f]|length) %}
+                              <td>
+                              {{newestPick[f][d][i]}}
+                              </td>
+                           {% endfor %}
+                           </tr>
+                        
+                           {% endfor %}
+                           {% endfor %}
+                           </tbody>
+                           
+                           
+                        </table>
+                     </div>             
+                      
+                  </form>
+                  </div>
+             </div>
+             <div class="row">
+               <div class="col-6">
+                  <form action = "{{ url_for('estimation') }}" method = "POST">  
+                     <input id="pickedStock1" type="hidden" name="pickedStock1" value=""/>
+                     <div class="form-group"> 
+                        Estimation Method
+                     </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estimationMethod" id="standard" value="standard" required>
+                        <label class="form-check-label" for="standard">
+                           Standard
+                        </label>
+                      </div>
+                      
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estimationMethod" id="CAPM" value="CAPM" required>
+                        <label class="form-check-label" for="CAPM">
+                           CAPM
+                        </label>
+                      </div>
+                      
+                      <p/>
+                     <div class="form-group row"> 
+                        <label for="startDate" class="col-4 col-form-label">Start Date:</label>
+                        <div class="col-8">
+                           <input type="date" class="form-control" id="startDate" name="startDate" required>
+                        </div>
+                     </div>
+                     <div class="form-group row"> 
+                        <label for="endDate" class="col-4 col-form-label">End Date:</label>
+                        <div class="col-8">
+                           <input type="date" class="form-control" id="endDate" name="endDate" required>
+                        </div>
+                     </div>
+                     <div class="form-group row">
+                        <label class="col-4 col-form-label">Set weight:</label>
+                      </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estimationMethodWeight" id="random" value="random" required>
+                        <label class="form-check-label" for="random">
+                           Random weight
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estimationMethodWeight" id="portfolio" value="portfolio" required>
+                        <label class="form-check-label" for="portfolio">
+                           Set weight according to portfolio
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estimationMethodWeight" id="manually" value="manually" required>
+                        <label class="form-check-label" for="manually">
+                           Set weight manually
+                        </label>
+                           <div class="form-group row"> 
+                              <label for="startDate" class="col-4 col-form-label">set weight</label>
+                              <div class="col-8">
+                                 <input type="text" class="form-control" id="setWeightManually" name="setWeightManually">
+                              </div>
+                           </div>
+                      </div>
+                      <p/>
+                     <div class="form-group"> 
+                        <input type="submit" value="Estimation">
+                     </div>
+                  </form>
+               </div>
+               <div class="col-6">
+                  <form action = "{{ url_for('optimization') }}" method = "POST">  
+                     <input id="pickedStock2" type="hidden" name="pickedStock2" value=""/>
+                     <div class="form-group"> 
+                        Optimization
+                     </div>
+                     
+                     <div class="form-group row"> 
+                        <label for="startDate2" class="col-4 col-form-label">Start Date:</label>
+                        <div class="col-8">
+                           <input type="date" class="form-control" id="startDate2" name="startDate2" required>
+                        </div>
+                     </div>
+                     <div class="form-group row"> 
+                        <label for="endDate2" class="col-4 col-form-label">End Date:</label>
+                        <div class="col-8">
+                           <input type="date" class="form-control" id="endDate2" name="endDate2" required>
+                        </div>
+                     </div>
+                  
+                     <div class="form-group row"> 
+                        <label for="fixedReturn" class="col-4 col-form-label">Fixed return (%):</label>
+                        <div class="col-8">
+                           <input type="number" class="form-control" id="fixedReturn" name="fixedReturn" step="0.0001" required>
+                        </div>
+                     </div>
+                     <div class="form-group row"> 
+                        <label for="riskFreeRate" class="col-4 col-form-label">Risk-Free Rate (%):</label>
+                        <div class="col-8">
+                           <input type="number" class="form-control" id="riskFreeRate" name="riskFreeRate" step="0.0001" required>
+                        </div>
+                     </div>
+                     <div class="form-group row">
+                           <label for="period" class="col-4 col-form-label">Period of Return:</label>
+                           <div class="col-8">   
+                              <input type="radio" name="period" value="monthly">Monthly Return</input>
+                              <br>
+                              <input type="radio" name="period" value="yearly">Yearly Return</input>
+                           </div>
+                     </div>
+                     <div class="form-group row">
+                           <label for="short" class="col-4 col-form-label">Allow short sales: ?</label>
+                           <div class="col-8">
+                              <input type="radio" checked="checked" name="shortSales" value="true">Allow</input>
+                              <br>
+                              <input type="radio" name="shortSales" value="false">Not allow</input>
+                           </div>
+                     </div>
+                     <div class="form-group"> 
+                        <input type="submit" value="Optimize">
+                     </div>
+                  </form>
+               </div>
+            </div>
+            </div>
+           </div>
+         </div>
+       </div>
+   </body>
+</html>

@@ -1,0 +1,253 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Student Information Collection</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+   <body>
+      <div class="container">
+         <div class="row">
+           <div class="col-8 offset-2"> 
+            <div class="container">
+               <div class="col-12" style="text-align: center;">
+                  <h1>Portfolio</h1>
+               </div>
+               <div class="row">
+                  <div class="col-12">
+                     <h3>Original portfolio</h3>
+                  </div>
+                  <div class="col-12">
+                     <table class="table">
+                        <thead>
+                        <tr>
+                           <th>Weights</th>
+                           <th>Name</th>
+                           <th>Start Date</th>
+                           <th>End Date</th>
+                           <th>Return</th>
+                           <th>Risk</th>
+                        </tr>
+                        </thead>
+                        {% for i in range(originalResult[1]|length) %}
+                        <tbody>
+                           <tr>
+                           {% for d in range(originalResult|length) %}
+                              <td>
+                              {{originalResult[d][i]}}
+                              </td>
+                           {% endfor %}
+                           </tr>
+                        </tbody>
+                        {% endfor %} 
+                     </table>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-12">
+                     <h3>After optimize portfolio</h3>
+                  </div>
+                  <div class="col-12">
+                     <table class="table">
+                        <thead>
+                        <tr>
+                           <th>Weights</th>
+                           <th>Name</th>
+                           <th>Start Date</th>
+                           <th>End Date</th>
+                           <th>Return</th>
+                           <th>Risk</th>
+                        </tr>
+                        </thead>
+                        {% for i in range(optimizationResult[1]|length) %}
+                        <tbody>
+                           <tr>
+                           {% for d in range(optimizationResult|length) %}
+                              <td>
+                              {{optimizationResult[d][i]}}
+                              </td>
+                           {% endfor %}
+                           </tr>
+                        </tbody>
+                        {% endfor %} 
+                     </table>
+                  </div>
+                  <div class="col-12">
+                     <h5>The fixed return : {{fixedReturn}}</h5>
+                  </div>
+                  <div class="col-12">
+                     <h5>The risk free rate : {{riskFreeRate}}</h5>
+                  </div>
+               </div>
+               <h3>Correlogram :</h3>
+                
+               {% for i in range(tickersLen) %}
+               <div class="row">
+                  {% for d in range(tickersLen) %}
+                  <div class="col-{{(12/tickersLen) | int }}">
+                     <canvas id="corrChartCol{{i}}{{d}}" width="400" height="400"></canvas>
+                  </div>
+                  {% endfor %} 
+               </div>
+               {% endfor %}
+                  <div class="row">
+                  <div class="col-6">
+                     <h3>Weights distrubution :</h3>
+                     <canvas id="myChart1" width="400" height="400"></canvas>
+                  </div>
+                  <div class="col-6">
+                     <h3>Risk among of tickers :</h3>
+                     <canvas id="myChart2" width="400" height="400"></canvas>
+                  </div>
+
+                  {% for i in range(tickersLen) %}
+                     {% for d in range(tickersLen) %}
+                     <script  type="text/javascript">
+                     df_returns = JSON.parse({{df_returns | tojson}}) 
+                     tickers = JSON.parse({{tickers | tojson}})
+                     tickersLabels = []
+                     for (let index = 1; index < 36; index++) {
+                        tickersLabels.push(index)
+                        
+                     }
+                     console.log(tickersLabels)
+                        if({{i}} != {{d}}){
+                           const data{{d}}{{i}} = {
+                              datasets: [{                              
+                                 label: "X : " + tickers[{{d}}] + " Y : " + tickers[{{i}}],
+                                 backgroundColor: 'rgb(255, 99, 132)',
+                                 borderColor: 'rgb(255, 99, 132)',
+                                 data: df_returns[{{d}}][{{i}}],
+                              }]
+                           };
+                           const config{{d}}{{i}} = {
+                              type: 'scatter',
+                              data: data{{d}}{{i}},
+                              options: {
+                                 scales: {
+                                    x: {
+                                       type: 'linear',
+                                       position: 'bottom'
+                                    }
+                                 }
+                              },
+                           };
+                           var myChart{{d}}{{i}} = new Chart(
+                              document.getElementById("corrChartCol{{i}}{{d}}"),
+                              config{{d}}{{i}}
+                           );
+                        }else{
+                           const data{{i}}{{d}} = {
+                              labels: tickersLabels,
+                              datasets: [{
+                                 label: tickers[{{i}}],
+                                 backgroundColor: 'rgb(255, 99, 132)',
+                                 borderColor: 'rgb(255, 99, 132)',
+                                 data: df_returns[{{i}}][{{d}}],
+                              }]
+                           };
+                           const config{{i}}{{d}} = {
+                              type: 'bar',
+                              data: data{{i}}{{d}},
+                              options: {
+                                 scales: {
+                                    y: {
+                                    beginAtZero: true
+                                    }
+                                 }
+                              },
+                           };
+                           var myChart = new Chart(
+                              document.getElementById('corrChartCol{{i}}{{d}}'),
+                              config{{i}}{{d}}
+                           );
+                        }
+                     </script>
+                     {% endfor %} 
+                  {% endfor %}
+                  <script  type="text/javascript">     
+                  tickers = JSON.parse({{tickers | tojson}}) 
+                  weights = JSON.parse({{weights | tojson}}) 
+                  y = JSON.parse({{y | tojson}}) 
+                  
+
+                  const labels = tickers
+                  const data = {
+                     labels: labels,
+                     datasets: [{
+                        label: 'My First dataset',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: weights,
+                     }]
+                  };
+                  const config = {
+                     type: 'bar',
+                     data: data,
+                     options: {
+                        scales: {
+                           y: {
+                           beginAtZero: true
+                           }
+                        }
+                     },
+                  };
+                  var myChart = new Chart(
+                     document.getElementById('myChart1'),
+                     config
+                  );
+                     
+                  
+                  const data2 = {
+                     labels: labels,
+                     datasets: [{
+                        label: 'My First dataset',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: y,
+                     }]
+                  };
+                  const config2 = {
+                     type: 'bar',
+                     data: data2,
+                     options: {
+                        scales: {
+                           y: {
+                           beginAtZero: true
+                           }
+                        }
+                     },
+                  };
+                  var myChart2 = new Chart(
+                     document.getElementById('myChart2'),
+                     config2
+                  );
+                  </script>
+                  </div>
+                  
+               <div class="row">
+                  <div class="col-12">
+                  <form action = "{{ url_for('home') }}" method = "POST">          
+                     <div class="form-group"> 
+                        <input type="submit" value="Back to Home">
+                     </div>                         
+                  </form>
+                  <form action = "{{ url_for('updatePorfolio') }}" method = "POST">          
+                     <div class="form-group"> 
+                        <input id="weights" type="hidden" name="weights" value={{weights | tojson|safe}}/>
+                        <!--<input id="return" type="hidden" name="return" value={{tickers | tojson}}>-->
+                        <input id="risk" type="hidden" name="risk" value={{y | tojson}}/>
+                        <input id="tickers" type="hidden" name="tickers" value={{tickers | tojson}}/>
+                        <input type="submit" value="Update Porfolio">
+                     </div>                         
+                  </form>
+                  </div>
+               </div>
+            </div>
+            </div>
+           </div>
+         </div>
+       </div>
+   </body>
+</html>
